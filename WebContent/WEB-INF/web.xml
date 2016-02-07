@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+  <display-name>springWebApp</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  <servlet>
+    <description></description>
+    <display-name>dispatcher</display-name>
+    <servlet-name>dispatcher</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>dispatcher</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+  
+  <listener>
+  	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+  
+  <context-param>
+  	<param-name>contextConfigLocation</param-name>
+  	<param-value>
+  		classpath:com/shingo/config/persistence-context.xml
+  		classpath:com/shingo/config/service-context.xml
+  	</param-value>
+  </context-param>
+  
+  
+<!--   configuracion recursos JDNI para JDBC -->
+<!-- JDNI es un acceso para cualquier programa o usuario para una base de datos -->
+<!-- o un recurso . -->
+<!-- Cuando un Usuario accesa con JDNI no necesita conocer que base de datos  -->
+<!-- y driver necesita, el usuario puede acceder a cualquier base de datos -->
+<!-- sin conocer todos los detalles de configuracion que necesita -->
+  <resource-ref>
+  	<description>DB Connection</description>
+  	<res-ref-name>jdbc/spring</res-ref-name>
+  	<res-type>javax.sql.DataSource</res-type>
+  	<res-auth>Container</res-auth>
+  </resource-ref>
+</web-app>
