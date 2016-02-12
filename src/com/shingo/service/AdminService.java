@@ -18,10 +18,10 @@ public class AdminService {
 	@Autowired
 	private AdminDao adminDao;
 	
-	public boolean save(Admin admin){
+	public void save(Admin admin){
 		Timestamp ts = new Timestamp(new Date().getTime());
 		admin.setFechaCreacion(ts);
-		return adminDao.save(admin);
+		adminDao.save(admin);
 	}
 
 	public List<Admin> findAll() {
@@ -32,18 +32,19 @@ public class AdminService {
 		return adminDao.findById(id);
 	}
 
-	public boolean saveOrUpdate(Admin admin) {
+	public void saveOrUpdate(Admin admin) {
 		if(admin.getIdAd() == 0){
 			//salvar el requistro
 			Timestamp ts = new Timestamp(new Date().getTime());
 			admin.setFechaCreacion(ts);
-			return adminDao.save(admin);
+			adminDao.save(admin);
 		}else {
-			return adminDao.update(admin);
+			adminDao.update(admin);
 		}	
 	}
 
-	public boolean delete(int id) {
-		return adminDao.delete(id);
+	public void delete(int id) {
+		Admin admin = adminDao.findById(id);
+		 adminDao.delete(admin);
 	}
 }

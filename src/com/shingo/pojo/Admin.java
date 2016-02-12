@@ -1,12 +1,35 @@
 package com.shingo.pojo;
 
 import java.sql.Timestamp;
+import java.util.Set;
 
+//import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="Admin")
 public class Admin {
+	//en el caso de no tener el mismo nombre, es decir, que un campo de la base de datos sea distinto 
+	//que en la variable de la clase se debera conlocar una anotacion ej:
+//	@Column(name="nombre")
+//	private String nombreCargo
+	//pero lo que si debo anotar es una anotacion diciendo que llave primaria voy a elegir
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int idAd;
 	private String nombre;
 	private String cargo;
 	private Timestamp fechaCreacion;
+	
+	//mappedBy indica quien es el dueño de la relacion
+	//es decir, la clave prmaria
+	@OneToMany(mappedBy="admin")
+	private Set<Direccion> direcciones;
 	
 	
 	public Admin(){}	
@@ -55,6 +78,17 @@ public class Admin {
 	public void setFechaCreacion(Timestamp fechaCreacion) {
 		this.fechaCreacion = fechaCreacion;
 	}
+	
+	
+	public Set<Direccion> getDirecciones() {
+		return direcciones;
+	}
+	
+
+	public void setDirecciones(Set<Direccion> direcciones) {
+		this.direcciones = direcciones;
+	}
+	
 
 	@Override
 	public String toString() {

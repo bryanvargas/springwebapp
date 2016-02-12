@@ -2,8 +2,6 @@ package com.shingo.controller;
 
 import java.util.List;
 
-import javax.websocket.server.PathParam;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,11 +39,8 @@ public class AdminController {
 	public String handleAdmin(@ModelAttribute("admin") Admin adminForm, Model model, RedirectAttributes ra) {
 		// @RequestParam("estado") String estado){
 
-		if (adminService.saveOrUpdate(adminForm)) {
-			ra.addFlashAttribute("resultado", "Cambios realizados con exito");
-		} else {
-			ra.addFlashAttribute("resultado", "Error al realizar los cambios");
-		}
+		adminService.saveOrUpdate(adminForm);
+		ra.addFlashAttribute("resultado", "Cambios realizados con exito");
 
 		// accion=activar?id=1 - esto es un requestparam
 		// model.addAttribute("adminForm", adminForm);
@@ -60,22 +55,18 @@ public class AdminController {
 		// return "index";
 		return "redirect:/admin";
 	}
-	
-	@RequestMapping(value="/admin/{idAd}/update")
-	public String showUpdate(Model model, @PathVariable("idAd") int id){
+
+	@RequestMapping(value = "/admin/{idAd}/update")
+	public String showUpdate(Model model, @PathVariable("idAd") int id) {
 		Admin admin = adminService.findById(id);
 		model.addAttribute("admin", admin);
 		return "admin";
 	}
-	
-	@RequestMapping(value="/admin/{idAd}/delete")
-	public String delete(@PathVariable("idAd") int id,
-			RedirectAttributes ra){
-		if(adminService.delete(id)){
-			ra.addFlashAttribute("resultado", "Cambios realizados con exito");
-		}else {
-			ra.addFlashAttribute("resultado", "Error al aplicar cambios");
-		}
+
+	@RequestMapping(value = "/admin/{idAd}/delete")
+	public String delete(@PathVariable("idAd") int id, RedirectAttributes ra) {
+		adminService.delete(id);
+		ra.addFlashAttribute("resultado", "Cambios realizados con exito");
 		return "redirect:/admin";
 	}
 

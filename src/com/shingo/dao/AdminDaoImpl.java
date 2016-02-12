@@ -1,113 +1,86 @@
 package com.shingo.dao;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
-import javax.sql.DataSource;
-
+import org.hibernate.Criteria;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.shingo.pojo.Admin;
-import com.shingo.pojo.AdminRowMapper;
+import com.shingo.service.AdminService;
 
-@Component("adminDao")
+//Todols los daos deben ser transaccionales, deotra forma daran algunos erroes a la 
+//hora de ejecutar algunos poryectos
+//Tambien hay que anotar @Repository, para indicarle a Hibernate que se trata de un DAO
+@Transactional
+@Repository
 public class AdminDaoImpl implements AdminDao {
-
-	private NamedParameterJdbcTemplate jdbcTemplate;
-
+	
+	//@Autowired, para que haga la inyeccion de dependencias de spring y nos regrese una instancia
+	//lista con las propiedades para ser utilizadas en el dao
+	//SessionFactory Es el responsable de crear la sesión a través de
+		//la cual Hibernate realizara las transacciones y accesos de datos pertinentes.
 	@Autowired
-	private void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+	private SessionFactory sessionFactory;
+	
+	public Session getSession(){
+		return sessionFactory.getCurrentSession();
 	}
-
+	
 	@Override
-	public boolean save(Admin admin) {
-
-		// ***Esta es una forma de guardar un Admin a la base de datos***//
-		// MapSqlParameterSource paramMap = new MapSqlParameterSource();
-		// paramMap.addValue("nombre", admin.getNombre());
-		// paramMap.addValue("cargo", admin.getCargo());
-		// paramMap.addValue("fechaCreacion", admin.getFechaCreacion());
-
-		// **************************************************************//
-
-		// Esta es otra forma mas sofisticada de realizar lo mismo//
-		BeanPropertySqlParameterSource paramMap = new BeanPropertySqlParameterSource(admin);
-		return jdbcTemplate.update(
-				"insert into Admin(nombre, cargo, fechaCreacion) values (:nombre, :cargo, :fechaCreacion)",
-				paramMap) == 1;
+	public void save(Admin admin) {
+		getSession().save(admin);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Admin> findAll() {
-		return jdbcTemplate.query("select * from Admin", new RowMapper() {
-			@Override
-			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-				Admin admin = new Admin();
-				admin.setIdAd(rs.getInt("idAd"));
-				admin.setCargo(rs.getString("cargo"));
-				admin.setFechaCreacion(rs.getTimestamp("fechaCreacion"));
-				admin.setNombre(rs.getString("nombre"));
-				return admin;
-			}
-		});
+		//se realizara consulta con HQL
+		Query query = getSession().createQuery("from Admin"); //MSQL: selecto * from Admin
+		return query.list();
 	}
 
 	@Override
 	public Admin findById(int id) {
-		// return (Admin) jdbcTemplate.query("select * from Admin where
-		// idAd=:idAd",
-		// new MapSqlParameterSource("idAd", id), new AdminRowMapper());
-
-		return jdbcTemplate.queryForObject("select * from Admin where idAd=:idAd",
-				new MapSqlParameterSource("idAd", id), new AdminRowMapper());
+		//utilizndo CRITERIAL
+		Criteria crit  = getSession().createCriteria(Admin.class);
+//		eqProperty: no nos pide la propiedad de la base de datos
+//		sino la propiedad del POJO Admin, que esta mapeada con las anotaciones
+//		JPA, y como se tiene los nombres identicos no hay muucha relevancia,
+//		recuerda que hibarnate no trabaja con la base de datos,
+//		trabaja con la clase ANOTADA con las anotacines JPA que se colocarton en la clase Admin.java,
+		//debido a mapping ORM
+		crit.add(Restrictions.eq("idAd", id));
+//		crit.uniqueResult() nos devolvera un solo resultado
+		return (Admin) crit.uniqueResult();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Admin> findByNombre(String nombre) {
-		return jdbcTemplate.query("select * from Admin where nombre like :nombre",
-				new MapSqlParameterSource("nombre", "%" + nombre + "%"), new AdminRowMapper());
+		Criteria crit = getSession().createCriteria(Admin.class);
+		crit.add(Restrictions.like("nombre", "%" + nombre + "%"));
+		return crit.list();
 	}
 
 	@Override
 	public List<Admin> finByIdNombre(int id, String nombre) {
-		MapSqlParameterSource paramMap = new MapSqlParameterSource();
-		paramMap.addValue("idAd", "%" + id + "%");
-		paramMap.addValue("nombre", "%" + nombre + "%");
-
-		return jdbcTemplate.query("select * from Admin where idAd like :idAd or nombre like :nombre", paramMap,
-				new AdminRowMapper());
+		return null;
 	}
 
 	@Override
-	public boolean update(Admin admin) {
-		return jdbcTemplate.update(
-				"update Admin set nombre=:nombre, cargo=:cargo, fechaCreacion=:fechaCreacion where idAd=:idAd",
-				new BeanPropertySqlParameterSource(admin)) == 1;
+	public void update(Admin admin) {
+		getSession().update(admin);
 	}
 
 	@Override
-	public boolean delete(int idAd) {
-		return jdbcTemplate.update("delete from Admin where idAd=:idAd", new MapSqlParameterSource("idAd", idAd)) == 1;
+	public void delete(Admin admin) {
+		getSession().delete(admin);
 	}
 
-	@Transactional
-	@Override
-	public int[] saveAll(List<Admin> admins) {
-		SqlParameterSource[] batchValues = SqlParameterSourceUtils.createBatch(admins.toArray());
-		return jdbcTemplate.batchUpdate(
-				"insert into Admin(idAd, nombre, cargo, fechaCreacion) values (:idAd, :nombre, :cargo, :fechaCreacion)",
-				batchValues);
-	}
 }

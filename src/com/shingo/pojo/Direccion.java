@@ -1,13 +1,26 @@
 package com.shingo.pojo;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
-@Component
+//ctrl + shift + o
+@Entity
+@Table(name="Direccion")
 public class Direccion {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int idDir;
 	private String calle;
 	private String cp;
+	
+	@ManyToOne
+	@JoinColumn(name="idAd")
+	private Admin admin;
 
 	public Direccion() {
 	}
@@ -16,19 +29,48 @@ public class Direccion {
 		this.calle = calle;
 		this.cp = cp;
 	}
-		
-	@Autowired
-	public void setCalle(@Value("Bolivia 2289")String calle){
+
+	public int getIdDir() {
+		return idDir;
+	}
+
+	public void setIdDir(int idDir) {
+		this.idDir = idDir;
+	}
+
+	public String getCalle() {
+		return calle;
+	}
+
+	public void setCalle(String calle) {
 		this.calle = calle;
 	}
-	
-	@Autowired
-	public void setCp(@Value("1744")String cp){
+
+	public String getCp() {
+		return cp;
+	}
+
+	public void setCp(String cp) {
 		this.cp = cp;
 	}
 
+	
+	
+	public Admin getAdmin() {
+		return admin;
+	}
+	
+
+	public void setAdmin(Admin admin) {
+		this.admin = admin;
+	}
+	
+
 	@Override
 	public String toString() {
-		return "Calle: " + calle + " Direccion: " + cp;
+		return "Direccion [idDir=" + idDir + ", calle=" + calle + ", cp=" + cp + "]";
 	}
+	
+	
+
 }
